@@ -1,6 +1,10 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
 
+// Project imports:
+import 'package:app_camera/consts/routes.dart';
+import 'package:app_camera/consts/translations.dart';
+
 class UiBottomNavigationBar extends StatelessWidget {
   final int index;
   final void Function(int)? onTap;
@@ -14,14 +18,14 @@ class UiBottomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
-      items: const [
+      items: [
         BottomNavigationBarItem(
-          icon: Icon(Icons.camera),
-          label: 'Camera',
+          icon: const Icon(Icons.camera),
+          label: labelsBottomBar[routeCamera],
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.image),
-          label: 'Images',
+          icon: const Icon(Icons.image),
+          label: labelsBottomBar[routeGallery],
         ),
       ],
       onTap: onTap,

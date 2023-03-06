@@ -1,6 +1,8 @@
 // Flutter imports:
-import 'package:app_camera/ui/components/ui_text.dart';
 import 'package:flutter/material.dart';
+
+// Project imports:
+import 'package:app_camera/ui/components/ui_text.dart';
 
 class UiEmptyData extends StatelessWidget {
   final String text;

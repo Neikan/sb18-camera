@@ -3,15 +3,22 @@ import 'dart:async';
 import 'dart:io';
 
 // Flutter imports:
-import 'package:app_camera/ui/components/ui_loader.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:camera/camera.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 // Project imports:
+import 'package:app_camera/bloc/bloc_gallery/bloc_gallery.dart';
+import 'package:app_camera/bloc/bloc_gallery/bloc_gallery_event.dart';
 import 'package:app_camera/consts/routes.dart';
 import 'package:app_camera/ui/components/ui_bottom_navigation_bar.dart';
+import 'package:app_camera/ui/components/ui_loader.dart';
+
+part 'components/ui_button_take_photo.dart';
+part 'components/ui_camera_preview.dart';
+part 'components/ui_preview.dart';
 
 class ScreenCamera extends StatefulWidget {
   const ScreenCamera({super.key});
@@ -54,69 +61,13 @@ class _ScreenCameraState extends State<ScreenCamera>
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final deviceRatio = size.width / size.height;
-
     return Scaffold(
       body: SafeArea(
         child: Stack(
           children: [
-            controller?.value.isInitialized == true
-                ? Center(
-                    child: AspectRatio(
-                      aspectRatio: deviceRatio,
-                      child: Transform(
-                        alignment: Alignment.center,
-                        transform: Matrix4.diagonal3Values(
-                          controller!.value.aspectRatio / deviceRatio,
-                          1.0,
-                          1.0,
-                        ),
-                        child: CameraPreview(controller!),
-                      ),
-                    ),
-                  )
-                : const UiLoader(),
-            if (lastImage != null)
-              Align(
-                alignment: Alignment.topRight,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.black,
-                      ),
-                    ),
-                    width: 120,
-                    height: 240,
-                    child: Image.file(
-                      File(lastImage!.path),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: IconButton(
-                  iconSize: 48,
-                  onPressed: () async {
-                    final image = await controller?.takePicture();
-
-                    setState(() {
-                      lastImage = image;
-                    });
-                  },
-                  icon: const Icon(
-                    Icons.camera_alt,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
+            UiCameraPreview(controller: controller),
+            if (lastImage != null) UiPreview(file: lastImage!),
+            UiButtonTakePhoto(onPressed: handleTakePhoto),
           ],
         ),
       ),
@@ -136,6 +87,16 @@ class _ScreenCameraState extends State<ScreenCamera>
     controller?.dispose();
 
     super.dispose();
+  }
+
+  void handleTakePhoto() {
+    controller?.takePicture().then((image) {
+      setState(() {
+        lastImage = image;
+      });
+
+      context.read<BlocGallery>().add(BlocGalleryEventAdd(image));
+    });
   }
 
   Future<void> _initCamera() async {
